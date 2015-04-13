@@ -3,4 +3,16 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+
+    <string name="no_datos">No se encontraron entradas disponibles</string>
+
+    <string-array name="colores">
+        <item>Azul</item>
+        <item>Verde</item>
+        <item>Rojo</item>
+        <item>Amarillo</item>
+        <item>Violeta</item>
+        <item>Café</item>
+    </string-array>
+
 </resources>
