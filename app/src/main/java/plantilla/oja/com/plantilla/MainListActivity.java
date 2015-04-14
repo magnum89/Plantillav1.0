@@ -7,9 +7,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -69,7 +71,24 @@ public class MainListActivity extends ListActivity {
         else
         {
             try {
-                Log.d(MARCA, contenidoJson.toString(2));
+
+                JSONObject datosJson = contenidoJson.getJSONObject("data");
+                JSONArray entradasJson = datosJson.getJSONArray("children");
+                titulos = new String[entradasJson.length()];//ahorramos dirigimos directamente
+                for (int i = 0; i < entradasJson.length(); i ++)
+                {
+                    JSONObject entradaJson = entradasJson.getJSONObject(i);
+                    JSONObject atributosJson = entradaJson.getJSONObject("data");
+                    String titulo = atributosJson.getString("title");
+                    //%20 es espacio en formato Json
+                    titulo = Html.fromHtml(titulo).toString();
+                    titulos[i] = titulo;
+                }
+
+                //adaptador para llevarlo a la pantalla y a la lista
+                ArrayAdapter<String> adaptador = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,titulos);
+                setListAdapter(adaptador);
+
             } catch (JSONException e) {
                 Log.e(MARCA,"HA OCURRIDO UNA EXCEPCION",e);
             }
