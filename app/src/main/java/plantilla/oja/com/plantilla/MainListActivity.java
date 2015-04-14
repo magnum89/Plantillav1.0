@@ -1,5 +1,6 @@
 package plantilla.oja.com.plantilla;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
 
 import android.content.Context;
@@ -62,11 +63,18 @@ public class MainListActivity extends ListActivity {
 
 
     public void actualizarLista(){
-
+        //contenidoJson = null; //para verificar no mas
         if(contenidoJson == null){
 
-            //TODO : manejar el error
-
+            //implementar dialogos
+            AlertDialog.Builder constructor = new AlertDialog.Builder(this);
+            constructor.setTitle(getString(R.string.titulo_error));//para obtener estas contastes usamos el metodo getString
+            constructor.setMessage(getString(R.string.mensaje_error));
+            //botones standares o personalizados
+            constructor.setPositiveButton("Entendido", null);//como no hemos puesto un onclick listener personalizado lo dejamos null
+            //contruirlo y mostrarlo
+            AlertDialog dialogo = constructor.create();
+            dialogo.show();
         }
         else
         {

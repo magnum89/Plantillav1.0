@@ -15,4 +15,7 @@
         <item>Café</item>
     </string-array>
 
+    <string name="titulo_error">ERROR!</string>
+    <string name="mensaje_error">No se pudieron obtener las entradas del blog</string>
+
 </resources>
