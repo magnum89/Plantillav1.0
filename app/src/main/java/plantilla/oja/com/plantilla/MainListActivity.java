@@ -12,7 +12,10 @@ import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -20,7 +23,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,12 +36,19 @@ public class MainListActivity extends ListActivity {
     protected String[] titulos;
     public static final String MARCA = MainListActivity.class.getSimpleName();    //ayuda a llevar registro de lo que sucede en la aplicacion
     protected  JSONObject contenidoJson;
+    protected ProgressBar barraProgreso;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_list);
+
+        barraProgreso = (ProgressBar)findViewById(R.id.progressBar);
+
         if (redDisponible()) {
+
+            barraProgreso.setVisibility(View.VISIBLE);
+
             TareaObtenerEntradas tareaObtenerEntradas = new TareaObtenerEntradas();
             tareaObtenerEntradas.execute();//intentara conectarse a internet
         }
@@ -62,19 +71,14 @@ public class MainListActivity extends ListActivity {
     }
 
 
-    public void actualizarLista(){
+    public void manejarRespuesta(){
+
+        barraProgreso.setVisibility(View.INVISIBLE);
+
         //contenidoJson = null; //para verificar no mas
         if(contenidoJson == null){
 
-            //implementar dialogos
-            AlertDialog.Builder constructor = new AlertDialog.Builder(this);
-            constructor.setTitle(getString(R.string.titulo_error));//para obtener estas contastes usamos el metodo getString
-            constructor.setMessage(getString(R.string.mensaje_error));
-            //botones standares o personalizados
-            constructor.setPositiveButton("Entendido", null);//como no hemos puesto un onclick listener personalizado lo dejamos null
-            //contruirlo y mostrarlo
-            AlertDialog dialogo = constructor.create();
-            dialogo.show();
+            mostrarError();
         }
         else
         {
@@ -101,6 +105,22 @@ public class MainListActivity extends ListActivity {
                 Log.e(MARCA,"HA OCURRIDO UNA EXCEPCION",e);
             }
         }
+    }
+
+    private void mostrarError() {
+
+        TextView textoVacio = (TextView) getListView().getEmptyView();
+        textoVacio.setText(getString(R.string.no_datos));
+
+        //implementar dialogos
+        AlertDialog.Builder constructor = new AlertDialog.Builder(this);
+        constructor.setTitle(getString(R.string.titulo_error));//para obtener estas contastes usamos el metodo getString
+        constructor.setMessage(getString(R.string.mensaje_error));
+        //botones standares o personalizados
+        constructor.setPositiveButton("Entendido", null);//como no hemos puesto un onclick listener personalizado lo dejamos null
+        //contruirlo y mostrarlo
+        AlertDialog dialogo = constructor.create();
+        dialogo.show();
     }
 
 
@@ -150,7 +170,7 @@ public class MainListActivity extends ListActivity {
         {
             contenidoJson = resultado;//puentiamos el hilo princpal con el doInBackground
             //funcion para actualizart la lista
-            actualizarLista();
+            manejarRespuesta();
         }
 
         private String leerCadena (InputStream cadena){
