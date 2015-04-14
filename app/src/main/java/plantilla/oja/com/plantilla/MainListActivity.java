@@ -12,7 +12,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -71,6 +75,15 @@ public class MainListActivity extends ListActivity {
                 //.openConnection() el retorna un objeto de manera regular toca hacer un cast
                 conexion.connect();
                 codigoRespuesta = conexion.getResponseCode();
+
+                if(codigoRespuesta==200){
+
+                    InputStream contenido = new BufferedInputStream(conexion.getInputStream());
+                    String respuesta = leerCadena(contenido);
+                    Log.v(MARCA,"CONTENIDO " + respuesta);//es la recomendada para mostrar objeto de gran tamaño
+
+                }
+
                 Log.e(MARCA, "codigo: " + codigoRespuesta);
             } catch (MalformedURLException e) {//de que el string podria no tener el formato no deseado
                 Log.e(MARCA,"Excepcion de formato",e);
@@ -85,6 +98,21 @@ public class MainListActivity extends ListActivity {
             return "Codigo: "+ codigoRespuesta;
         }
 
+        private String leerCadena (InputStream cadena){
+
+            ByteArrayOutputStream resultado = new ByteArrayOutputStream();
+            try {
+                int cursor = cadena.read();
+                while (cursor != -1){
+                    resultado.write(cursor);
+                    cursor = cadena.read();
+                }
+                return resultado.toString();
+            } catch (IOException e) {
+                return "ERROR"+e.getMessage();
+            }
+
+        }
 
     }
 
