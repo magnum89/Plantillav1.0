@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,14 +30,19 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class MainListActivity extends ListActivity {
 
-    protected String[] titulos;
+
     public static final String MARCA = MainListActivity.class.getSimpleName();    //ayuda a llevar registro de lo que sucede en la aplicacion
     protected  JSONObject contenidoJson;
     protected ProgressBar barraProgreso;
+
+    private final String TITULO = "titulo";
+    private final String AUTOR = "autor";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +92,9 @@ public class MainListActivity extends ListActivity {
 
                 JSONObject datosJson = contenidoJson.getJSONObject("data");
                 JSONArray entradasJson = datosJson.getJSONArray("children");
-                titulos = new String[entradasJson.length()];//ahorramos dirigimos directamente
+
+                ArrayList<HashMap<String, String >> entradasBlog = new ArrayList<HashMap<String, String >>();
+
                 for (int i = 0; i < entradasJson.length(); i ++)
                 {
                     JSONObject entradaJson = entradasJson.getJSONObject(i);
@@ -94,11 +102,23 @@ public class MainListActivity extends ListActivity {
                     String titulo = atributosJson.getString("title");
                     //%20 es espacio en formato Json
                     titulo = Html.fromHtml(titulo).toString();
-                    titulos[i] = titulo;
+
+                    String autor = atributosJson.getString("author");
+                    autor = Html.fromHtml(autor).toString();
+                    HashMap<String, String> entradaBlog = new HashMap<String, String>();
+                    entradaBlog.put(AUTOR, autor);
+                    entradaBlog.put(TITULO, titulo);
+                    //agregamos al arraylist
+                    entradasBlog.add(entradaBlog);
+
+
                 }
 
-                //adaptador para llevarlo a la pantalla y a la lista
-                ArrayAdapter<String> adaptador = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,titulos);
+                //identificadores donde se almacenara
+                String[] identificadores = {TITULO, AUTOR};
+                int[] idXMLViews = {android.R.id.text1, android.R.id.text2};
+                SimpleAdapter adaptador = new SimpleAdapter(this, entradasBlog, android.R.layout.simple_list_item_2, identificadores, idXMLViews);
+
                 setListAdapter(adaptador);
 
             } catch (JSONException e) {
