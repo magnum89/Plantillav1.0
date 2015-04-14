@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
@@ -29,6 +30,7 @@ public class MainListActivity extends ListActivity {
 
     protected String[] titulos;
     public static final String MARCA = MainListActivity.class.getSimpleName();    //ayuda a llevar registro de lo que sucede en la aplicacion
+    protected  JSONObject contenidoJson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,14 +44,7 @@ public class MainListActivity extends ListActivity {
             Toast.makeText(this, "La red no esta disponible", Toast.LENGTH_LONG).show();
         }
 
-        //añadimos el array por resource
-        //Resources recursos = getResources();
-        //titulos = recursos.getStringArray(R.array.colores);//no accederemos a los strings sino a los array
-        //ArrayAdapter<String> adaptador = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, titulos);//se crea un adaptador para el array
-        //setListAdapter(adaptador);//adaptamos el array a la lista
 
-        //String mensaje = getString(R.string.no_datos);
-        //Toast.makeText(this,mensaje,Toast.LENGTH_LONG).show();
     }
 
     private boolean redDisponible(){
@@ -64,13 +59,32 @@ public class MainListActivity extends ListActivity {
     }
 
 
+    public void actualizarLista(){
+
+        if(contenidoJson == null){
+
+            //TODO : manejar el error
+
+        }
+        else
+        {
+            try {
+                Log.d(MARCA, contenidoJson.toString(2));
+            } catch (JSONException e) {
+                Log.e(MARCA,"HA OCURRIDO UNA EXCEPCION",e);
+            }
+        }
+    }
+
+
     //se deben trabajar la conexion en paralelo por medio de hilos
-    private class TareaObtenerEntradas extends AsyncTask<Object,Void,String> {//objeto generico, progreso pero como no me interesa controlarlo damos void
+    private class TareaObtenerEntradas extends AsyncTask<Object,Void,JSONObject> {//objeto generico, progreso pero como no me interesa controlarlo damos void
         //implementamos los metodos del AsyncTask
         @Override
-        protected String doInBackground(Object... params) {
+        protected JSONObject doInBackground(Object... params) {
 
             int codigoRespuesta = -1;
+            JSONObject contenidoJson = null;
 
             try {//toca agregar try catch
                 URL fuenteDatos = new URL("http://reddit.com/r/gaming/.json"); //recibe como parametro el string correspondiente a la direccion
@@ -85,17 +99,8 @@ public class MainListActivity extends ListActivity {
                     String respuesta = leerCadena(contenido);
                     //Log.v(MARCA,"CONTENIDO " + respuesta);//es la recomendada para mostrar objeto de gran tamaño
                     //usar la clase JSON Object para crear un nuevo objeto q contendra los dtos de la respuesta de manera ordenada
-                    JSONObject contenidoJson = new JSONObject(respuesta);
-                    JSONObject datosJson = contenidoJson.getJSONObject("data");//accedido al objeto data
-                    JSONArray entradasJson = datosJson.getJSONArray("children");//accedimos al array children
-                    //para recorrerlo usamos el ciclo for
-                    for (int i=0; i < entradasJson.length(); i++){
-                        //imprimiremos mientras los titulos de las entradas que recivimos
-                        JSONObject entradaJson = entradasJson.getJSONObject(i);
-                        JSONObject atributJson = entradaJson.getJSONObject("data");
-                        String titulo = atributJson.getString("title");
-                        Log.v(MARCA, "ENTRADA: "+ i +" : "+ titulo );
-                    }
+                    contenidoJson = new JSONObject(respuesta);
+
 
                 }
 
@@ -110,7 +115,15 @@ public class MainListActivity extends ListActivity {
                 Log.e(MARCA,"Surgio una excepcion",e);
             }
 
-            return "Codigo: "+ codigoRespuesta;
+            return contenidoJson;
+        }
+
+        @Override//tiene acceso a los atributos del usuario
+        protected void onPostExecute(JSONObject resultado)
+        {
+            contenidoJson = resultado;//puentiamos el hilo princpal con el doInBackground
+            //funcion para actualizart la lista
+            actualizarLista();
         }
 
         private String leerCadena (InputStream cadena){
