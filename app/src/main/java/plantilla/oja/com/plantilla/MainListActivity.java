@@ -12,6 +12,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -80,7 +83,19 @@ public class MainListActivity extends ListActivity {
 
                     InputStream contenido = new BufferedInputStream(conexion.getInputStream());
                     String respuesta = leerCadena(contenido);
-                    Log.v(MARCA,"CONTENIDO " + respuesta);//es la recomendada para mostrar objeto de gran tamaño
+                    //Log.v(MARCA,"CONTENIDO " + respuesta);//es la recomendada para mostrar objeto de gran tamaño
+                    //usar la clase JSON Object para crear un nuevo objeto q contendra los dtos de la respuesta de manera ordenada
+                    JSONObject contenidoJson = new JSONObject(respuesta);
+                    JSONObject datosJson = contenidoJson.getJSONObject("data");//accedido al objeto data
+                    JSONArray entradasJson = datosJson.getJSONArray("children");//accedimos al array children
+                    //para recorrerlo usamos el ciclo for
+                    for (int i=0; i < entradasJson.length(); i++){
+                        //imprimiremos mientras los titulos de las entradas que recivimos
+                        JSONObject entradaJson = entradasJson.getJSONObject(i);
+                        JSONObject atributJson = entradaJson.getJSONObject("data");
+                        String titulo = atributJson.getString("title");
+                        Log.v(MARCA, "ENTRADA: "+ i +" : "+ titulo );
+                    }
 
                 }
 
