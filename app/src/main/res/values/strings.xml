@@ -17,5 +17,6 @@
 
     <string name="titulo_error">ERROR!</string>
     <string name="mensaje_error">No se pudieron obtener las entradas del blog</string>
+    <string name="title_activity_vista_web">VistaWeb</string>
 
 </resources>

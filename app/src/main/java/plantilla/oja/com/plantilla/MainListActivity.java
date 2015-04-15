@@ -4,8 +4,10 @@ import android.app.AlertDialog;
 import android.app.ListActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
@@ -13,7 +15,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
+
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -63,6 +66,35 @@ public class MainListActivity extends ListActivity {
         }
 
 
+    }
+
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+        super.onListItemClick(l, v, position, id);
+        //acceder a los datos que tenemos guardados en un objetoJson
+        JSONObject datosJson = null;
+        try {
+
+            datosJson = contenidoJson.getJSONObject("data");
+            JSONArray entradasJson = datosJson.getJSONArray("children");
+            //seleccionar la entrada y almacenarla en un objeto Json
+            JSONObject entradaJson = entradasJson.getJSONObject(position);
+            JSONObject atributosJson = entradaJson.getJSONObject("data");
+            String url = atributosJson.getString("url");
+            //Intent llamado = new Intent(Intent.ACTION_VIEW);//abrir una explorador
+            Intent llamado = new Intent(this,VistaWeb.class);//llamado a la nueva actividad
+            llamado.setData(Uri.parse(url));//asignar la url , objeto uri pero es un string para transformar usamos el metodo parse
+            startActivity(llamado);//ejecutarlo
+
+        } catch (JSONException e) {
+            registrarExcepcion(e);
+        }
+
+
+    }
+
+    private void registrarExcepcion(Exception e) {
+        Log.e(MARCA, "Ocurrio una Excepcion", e);
     }
 
     private boolean redDisponible(){
@@ -122,7 +154,7 @@ public class MainListActivity extends ListActivity {
                 setListAdapter(adaptador);
 
             } catch (JSONException e) {
-                Log.e(MARCA,"HA OCURRIDO UNA EXCEPCION",e);
+                registrarExcepcion(e);
             }
         }
     }
@@ -173,13 +205,13 @@ public class MainListActivity extends ListActivity {
 
                 Log.e(MARCA, "codigo: " + codigoRespuesta);
             } catch (MalformedURLException e) {//de que el string podria no tener el formato no deseado
-                Log.e(MARCA,"Excepcion de formato",e);
+                registrarExcepcion(e);
             }
             catch (IOException e){
-                Log.e(MARCA,"Surgio una excepcion",e);
+                registrarExcepcion(e);
             }
             catch (Exception e){//excepciones genericas
-                Log.e(MARCA,"Surgio una excepcion",e);
+                registrarExcepcion(e);
             }
 
             return contenidoJson;
@@ -234,3 +266,5 @@ public class MainListActivity extends ListActivity {
         return super.onOptionsItemSelected(item);
     }
 }
+
+
